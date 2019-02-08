@@ -176,17 +176,53 @@ See [here](ssh.md) for different types of SSH connection with respect to your OS
 
 1. What is the ``grep``command?
 
+The gprep command is used to search for text patterns within an input file. These patterns take the form of regular expressions, also called regex. A regex defines a search pattern according to a particular syntax, typically POSIX.
+
 2. What is the meaning of ``#!/bin/python`` at the start of scripts?
 
+This is called a shebang. In Unix based operating systems (like Linux), a shebang at the start of a file indicates the interpreter that will be used to run the file as an executable. In the case of ``#!/bin/python/`` the shebang indicates that the Python interpreter will be used to execute the script.
+
 3. Download using ``wget`` the [*bsds500*](https://www2.eecs.berkeley.edu/Research/Projects/CS/vision/grouping/resources.html#bsds500) image segmentation database, and decompress it using ``tar`` (keep it in you hard drive, we will come back over this data in a few weeks).
+
+![Download](lab1-01.png)
+/home/camyok/Pictures/lab1-02.png
+/home/camyok/Pictures/lab1-03.png
+/home/camyok/Pictures/lab1-04.png
  
 4. What is the disk size of the uncompressed dataset, How many images are in the directory 'BSR/BSDS500/data/images'?
+
+Using the ``du``, the size on disk of the uncompressed BSR folder is 74128 KB, or approximately 73 MB. Using the ``find`` command with wildcards (``*`` in this case) produces the expected results by searching **only** for ``.jpg`` files (the only image extension found in the database).
+
+```bash
+du BSR
+find BSR/BSDS500/data/images -iname '*.jpg' | wc -l
+```
  
 5. What are all the different resolutions? What is their format? Tip: use ``awk``, ``sort``, ``uniq`` 
 
+There are 2 resolutions to be found: 321x481 and 481x321. This was determined using ImageMagick, recovering relevant data using ``identify``:
+
+```bash
+identify -format " %wx%h\n" $(find BSR/BSDS500/data/images -iname '*.jpg')|sort|uniq
+```
+
+In this case, ``uniq`` is applied after sort because it only removes adyacent duplicates.
+
 6. How many of them are in *landscape* orientation (opposed to *portrait*)? Tip: use ``awk`` and ``cut``
+
+Using a similar batch strategy, as well as the ``awk`` command, it was found out that there are 348 images in landscape orientation (where the horizontal dimension is larger than the vertical one).
+
+![Numerals 4 through 6](lab1-02.png)
  
 7. Crop all images to make them square (256x256) and save them in a different folder. Tip: do not forget about  [imagemagick](http://www.imagemagick.org/script/index.php).
+
+The convert -crop command is used with the batch pardigm already established.
+
+```bash
+identify -format " %w %h\n" $(find BSR/BSDS500/data/images -iname '*.jpg')|awk '$1>$2{print}'| wc -l
+```
+![Crop](lab1-03.png)
+![Resolution verification](lab1-04.png)
 
 
 # Report
