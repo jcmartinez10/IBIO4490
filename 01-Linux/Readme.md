@@ -210,7 +210,7 @@ In this case, ``uniq`` is applied after sort because it only removes adyacent du
 
 6. How many of them are in *landscape* orientation (opposed to *portrait*)? Tip: use ``awk`` and ``cut``
 
-Using a similar batch strategy, as well as the ``awk`` command, it was found out that there are 348 images in landscape orientation (where the horizontal dimension is larger than the vertical one).
+Using a similar batch strategy, as well as the ``awk`` command, it was found that there are 348 images in landscape orientation (where the horizontal dimension is larger than the vertical one).
 
 ![Numerals 4 through 6](lab1-02.png)
  
@@ -219,7 +219,7 @@ Using a similar batch strategy, as well as the ``awk`` command, it was found out
 The convert -crop command is used with the batch pardigm already established.
 
 ```bash
-identify -format " %w %h\n" $(find BSR/BSDS500/data/images -iname '*.jpg')|awk '$1>$2{print}'| wc -l
+convert -crop 256x256+0+0 $(find BSR/BSDS500/data/images -iname '*.jpg') crops/cropped-%d.jpg
 ```
 ![Crop](lab1-03.png)
 ![Resolution verification](lab1-04.png)
