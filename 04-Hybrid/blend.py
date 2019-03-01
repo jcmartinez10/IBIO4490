@@ -1,10 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Feb 21 17:28:41 2019
-
-@author: luisa
-"""
-
 #!/usr/bin/python
 
 #Import the modules
@@ -33,59 +27,49 @@ zip_ref.close()
 img1=cv2.imread('./luisa.png')
 img2=cv2.imread('./juancamilo.png')
 
+# Resize the image to a number that is a power of two (2^9)
 img1 = cv2.resize(img1,(int(512),int(512)))
 img2 = cv2.resize(img2,(int(512),int(512)))
 
-# Puts them into the rigth format
+# Puts the images in the rigth format to visualize them
 img1=cv2.cvtColor(img1,cv2.COLOR_BGR2RGB)
 img2=cv2.cvtColor(img2,cv2.COLOR_BGR2RGB)
 
-im1 = img1.copy()
-Gauss1 = [im1]
-for i in range(1,6):
-	im1 = cv2.pyrDown(im1)
-	Gauss1.append(im1)
 
-# generate Gaussian pyramid for B
-im2 = img2.copy()
-Gauss2 = [im2]
+# Generate Gaussian pyramid for the images
+Gauss1 = [img1.copy()]
+Gauss2 = [img2.copy()]
 for i in range(1,6):
-	Gauss2 = cv2.pyrDown(im2)
-	Gauss2.append(im2)
-# generate Laplacian Pyramid for A
+    im1 = cv2.pyrDown(Gauss1[i-1])
+    im2 = cv2.pyrDown(Gauss2[i-1])	
+    Gauss1.append(im1)
+    Gauss2.append(im2)
+
+# Generate Laplacian Pyramid for the images
 lap1 = [Gauss1[5]]
-for i in range(5,0,-1):
-	GE = cv2.pyrUp(Gauss1[i])
-	L = cv2.subtract(Gauss1[i-1],GE)
-	lap1.append(L)
-
-# generate Laplacian Pyramid for B
 lap2 = [Gauss2[5]]
-for i in range(5,0,-1):
-	GE = cv2.pyrUp(Gauss2[i])
-	L = cv2.subtract(Gauss2[i-1],GE)
-	lap2.append(L)
+for i in range(5,0,-1): 
+	L1 = cv2.subtract(Gauss1[i-1],cv2.pyrUp(Gauss1[i]))
+	L2 = cv2.subtract(Gauss2[i-1],cv2.pyrUp(Gauss2[i]))
+	lap1.append(L1)
+	lap2.append(L2)
 
-LS = []
+# Concatenate the images
+GL = []
 for la,lb in zip(lap1,lap2):
-	rows,cols,dpt = la.shape
-	cols=cols/2
-	cols=int(cols)
-	ls = np.hstack((la[:,0:cols], lb[:,cols:]))
-	LS.append(ls)
+	_,cols,_ = la.shape
+	GL.append(np.hstack((la[:,0:int(cols/2)], lb[:,int(cols/2):])))
 
-# Now reconstruct
-ls_ = LS[0]
-for i in range(1,6):
-	ls_ = cv2.pyrUp(ls_)
-	ls_ = cv2.add(ls_,LS[i])
+# Reconstruct to create the blended image
+blend = GL[0]
+for i in range(1,6): 
+	blend = cv2.add(cv2.pyrUp(blend),GL[i])
 
-# image with direct connecting each half
-
-plt.imshow(ls_)
-plt.show()
-
-cv2.imwrite('Pyramid_blending2.jpg',ls_)
+# Shows the final blended image
+plt.figure(1)
+plt.axis('off')
+plt.imshow(blend)
 
 #References
+# This code was based on the example found in:
 # https://docs.opencv.org/3.1.0/dc/dff/tutorial_py_pyramids.html
